@@ -26,3 +26,7 @@ To install the extension, open the Extensions view (`Ctrl+Shift+X`), search for 
 
 - iconv-lite: for character encoding conversion.
 - ignore: for managing .gitignore style files.
+
+## Disclaimer
+
+Please note that this extension is provided "as is" and you use it at your own risk. The author is not responsible for any damages or loss of data that may occur from its use.
