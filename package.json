@@ -3,6 +3,10 @@
   "icon": "img/logo.png",
   "displayName": "TFSForCode",
   "description": "",
+  "repository": {
+    "url": "https://github.com/blackcodetavern/tfsforcode",
+    "type": "github"
+  },
   "author": {"name": "Immanuel Zumbruch"},
   "version": "0.5.0",
   "engines": {
