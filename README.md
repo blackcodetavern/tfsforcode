@@ -6,8 +6,8 @@ TFSForCode is a Visual Studio Code extension that provides Team Foundation Serve
 
 The extension contributes the following commands:
 
-- TFS - Undo change`: Undo the changes made to the file.
-- TFS - Checkout file`: Checkout the file from TFS.
+- TFS - Undo change: Undo the changes made to the file.
+- TFS - Checkout file: Checkout the file from TFS.
 - TFS - Check in: Check in the included files to TFS. This can be done in the TFS Tab
 
 These commands can be accessed from the context menu in the file explorer or the command palette (`Ctrl+Shift+P`).
