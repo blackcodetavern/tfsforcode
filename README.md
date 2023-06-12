@@ -2,6 +2,16 @@
 
 TFSForCode is a Visual Studio Code extension that provides Team Foundation Server (TFS) operations in VS Code. The extension allows you to perform common source control operations directly from VS Code.
 
+## Critical ToDos
+
+There are some important shortcomings
+- Works only with the german version of the tf.exe
+- Renames are not yet possible
+- No compare with previous version of a file
+- No show history
+- Include/Exclude all items from the pending changes treeview are missing.
+...
+
 ## Features
 
 The extension contributes the following commands:
