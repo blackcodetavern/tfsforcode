@@ -5,12 +5,13 @@ TFSForCode is a Visual Studio Code extension that provides Team Foundation Serve
 ## Critical ToDos
 
 There are some important shortcomings
-- Works only with the german version of the tf.exe
-- Renames are not yet possible
+- Works only with the german and english version of the tf.exe (you can change the settings)
+- Renames, merges and undeletes are not yet possible
 - No compare with previous version of a file
 - No show history
 - Include/Exclude all items from the pending changes treeview are missing.
-...
+- checkout of multiple files 
+- ...
 
 ## Features
 
@@ -26,11 +27,7 @@ The extension also provides a view container in the activity bar labelled "TFS",
 
 ## Requirements
 
-This extension requires the `tf.exe` command-line client for Team Foundation Server. You can specify the path to `tf.exe` in the extension settings (`tfsforcode.tfPath`). The default path is set to `"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Professional\\Common7\\IDE\\CommonExtensions\\Microsoft\\TeamFoundation\\Team Explorer\\tf.exe"`.
-
-## Installation
-
-To install the extension, open the Extensions view (`Ctrl+Shift+X`), search for `tfsforcode`, and click on the Install button.
+This extension requires the `tf.exe` command-line client for Team Foundation Server. You can specify the path to `tf.exe` in the extension settings (`tfsforcode.tfPath`).
 
 ## Dependencies
 
