@@ -2,8 +2,22 @@ const vscode = require('vscode');
 const ignore = require("ignore");
 const fs = require("fs");
 const path = require("path")
+const lang = require("./lang.js");
+var configuration = vscode.workspace.getConfiguration("tfsforcode");
 
 var ignoreParser;
+
+function getTranslatedStrings() {
+  return lang[configuration.get("tfLang")]
+}
+
+function getTFSPath() {
+  return configuration.get("tfPath");
+}
+
+function getTFSCharSet() {
+  return configuration.get("tfCharSet");
+}
 
 
 function initIgnoreParser() {
@@ -95,7 +109,7 @@ function getWorkspaceFolder() {
   if (!workspaceFolder) {
     return "";
   }
-  return unifyFileName(workspaceFolder.uri.fsPath+"/");
+  return unifyFileName(workspaceFolder.uri.fsPath.toLocaleLowerCase() + "/");
 }
 
 
@@ -104,6 +118,9 @@ module.exports = {
   revertFile,
   deleteFile,
   isIgnoreFile,
+  isValidFile,
   getWorkspaceFolder,
-  isValidFile
+  getTranslatedStrings,
+  getTFSPath,
+  getTFSCharSet
 };

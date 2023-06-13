@@ -21,8 +21,21 @@
         "properties": {
             "tfsforcode.tfPath": {
                 "type": "string",
-                "default": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Professional\\Common7\\IDE\\CommonExtensions\\Microsoft\\TeamFoundation\\Team Explorer\\tf.exe",
+                "default": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\Common7\\IDE\\CommonExtensions\\Microsoft\\TeamFoundation\\Team Explorer\\tf.exe",
                 "description": "Path to tf.exe file."
+            },
+            "tfsforcode.tfLang": {
+              "type": "string",
+              "default": "de",
+              "enum": ["de", "en"],
+              "enumDescriptions": ["German", "English"],
+              "description": "Choose the language of the TF.exe"
+            },
+            "tfsforcode.tfCharSet": {
+              "type": "string",
+              "default": "latin1",
+              "enum": ["latin1", "utf-8"],
+              "description": "Choose the charset of the TF.exe"
             }
         }
     },
