@@ -184,6 +184,7 @@ function activate(context) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand("tfsforcode.checkin", async () => {
+      await vscode.workspace.saveAll();
       var fileNames = [];
       getLeaves(ChangeManager.rebuildTree(true), fileNames);
       let message = await vscode.window.showInputBox({
