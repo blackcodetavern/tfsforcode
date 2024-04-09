@@ -7,7 +7,9 @@
     "url": "https://github.com/blackcodetavern/tfsforcode",
     "type": "github"
   },
-  "author": {"name": "Immanuel Zumbruch"},
+  "author": {
+    "name": "Immanuel Zumbruch"
+  },
   "version": "0.5.0",
   "engines": {
     "vscode": "^1.78.0"
@@ -17,27 +19,36 @@
   ],
   "contributes": {
     "configuration": {
-        "title": "TFSForCode",
-        "properties": {
-            "tfsforcode.tfPath": {
-                "type": "string",
-                "default": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\Common7\\IDE\\CommonExtensions\\Microsoft\\TeamFoundation\\Team Explorer\\tf.exe",
-                "description": "Path to tf.exe file."
-            },
-            "tfsforcode.tfLang": {
-              "type": "string",
-              "default": "de",
-              "enum": ["de", "en"],
-              "enumDescriptions": ["German", "English"],
-              "description": "Choose the language of the TF.exe"
-            },
-            "tfsforcode.tfCharSet": {
-              "type": "string",
-              "default": "latin1",
-              "enum": ["latin1", "utf-8"],
-              "description": "Choose the charset of the TF.exe"
-            }
+      "title": "TFSForCode",
+      "properties": {
+        "tfsforcode.tfPath": {
+          "type": "string",
+          "default": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\Common7\\IDE\\CommonExtensions\\Microsoft\\TeamFoundation\\Team Explorer\\tf.exe",
+          "description": "Path to tf.exe file."
+        },
+        "tfsforcode.tfLang": {
+          "type": "string",
+          "default": "de",
+          "enum": [
+            "de",
+            "en"
+          ],
+          "enumDescriptions": [
+            "German",
+            "English"
+          ],
+          "description": "Choose the language of the TF.exe"
+        },
+        "tfsforcode.tfCharSet": {
+          "type": "string",
+          "default": "latin1",
+          "enum": [
+            "latin1",
+            "utf-8"
+          ],
+          "description": "Choose the charset of the TF.exe"
         }
+      }
     },
     "commands": [
       {
@@ -47,6 +58,10 @@
       {
         "command": "tfsforcode.checkout",
         "title": "TFS - Checkout file"
+      },
+      {
+        "command": "tfsforcode.add",
+        "title": "TFS - Add file"
       },
       {
         "command": "tfsforcode.exclude",
@@ -69,6 +84,10 @@
         },
         {
           "command": "tfsforcode.undo",
+          "when": "true"
+        },
+        {
+          "command": "tfsforcode.add",
           "when": "true"
         }
       ],
@@ -136,6 +155,6 @@
   },
   "dependencies": {
     "iconv-lite": "^0.6.3",
-    "ignore":"^5.2.4"
+    "ignore": "^5.2.4"
   }
 }

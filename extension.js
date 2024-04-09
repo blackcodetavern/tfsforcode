@@ -14,7 +14,7 @@ const Helper = require("./src/helper.js")
  */
 function activate(context) {
   var ChangeManager = cm(context);
-  
+
   async function refreshCheckedOutFiles() {
     ChangeManager.setChangedFiles(await TFSInterface.getCheckedOutFiles());
     tfDoneEmitter.fire();
@@ -35,7 +35,7 @@ function activate(context) {
     let changedFile = ChangeManager.getChangedFile(fileName);
     var success = false;
     if (!changedFile.path) success = await TFSInterface.checkoutFile(fileName);
-    
+
     if (success) {
       ChangeManager.addCheckedOutFile(fileName);
       tfDoneEmitter.fire();
@@ -52,24 +52,24 @@ function activate(context) {
     }
     tfDoneEmitter.fire();
   }
-	
+
   async function deleteFile(fileName) {
     if (Helper.isIgnoreFile(fileName)) return;
     let changedFile = ChangeManager.getChangedFile(fileName);
-    if (changedFile.mode == "C")
-      await TFSInterface.undoCheckout(fileName);
+    if (changedFile.mode == "C") await TFSInterface.undoCheckout(fileName);
 
     if (await TFSInterface.deleteFile(fileName)) {
       ChangeManager.addDeletedFile(fileName);
       tfDoneEmitter.fire();
     }
   }
-	
+
   async function checkInFiles(fileNames, comment) {
     await TFSInterface.checkinFiles(fileNames, comment);
-		
+
     for (var i = 0; i < fileNames.length; i++) {
-      if (!Helper.isIgnoreFile(fileNames[i])) ChangeManager.removeChangedFile(fileNames[i]);
+      if (!Helper.isIgnoreFile(fileNames[i]))
+        ChangeManager.removeChangedFile(fileNames[i]);
     }
     tfDoneEmitter.fire();
   }
@@ -79,22 +79,21 @@ function activate(context) {
       var children = Object.values(item.children);
       if (children.length == 0) out.push(item);
     } else {
-      children = Object.values(item)
+      children = Object.values(item);
     }
     for (var i = 0; i < children.length; i++) {
       var curChild = children[i];
-      var curChildLength = Object.values(children[i].children).length
+      var curChildLength = Object.values(children[i].children).length;
       if (curChildLength == 0) {
-        out.push(curChild)
+        out.push(curChild);
       } else {
-        getLeaves(curChild, out)
+        getLeaves(curChild, out);
       }
     }
-
   }
 
   async function changeIncludation(item, include) {
-    var leaves = []
+    var leaves = [];
     getLeaves(item, leaves);
     for (var i = 0; i < leaves.length; i++) {
       var fileName = leaves[i].fullPath;
@@ -122,11 +121,19 @@ function activate(context) {
     })
   );
 
-  // Undo action
+  // Checkout action
   context.subscriptions.push(
     vscode.commands.registerCommand("tfsforcode.checkout", async (uri) => {
       var fileName = Helper.unifyFileName(uri.fsPath);
       checkoutFile(fileName);
+    })
+  );
+
+  // Add action
+  context.subscriptions.push(
+    vscode.commands.registerCommand("tfsforcode.add", async (uri) => {
+      var fileName = Helper.unifyFileName(uri.fsPath);
+      addFile(fileName);
     })
   );
 
@@ -143,7 +150,6 @@ function activate(context) {
       changeIncludation(item, true);
     })
   );
-	
 
   // Checkout action
   context.subscriptions.push(
@@ -155,29 +161,27 @@ function activate(context) {
     })
   );
 
-
   let watcher = vscode.workspace.createFileSystemWatcher("**/*");
 
   watcher.onDidCreate((uri) => {
     let fileName = Helper.unifyFileName(uri.fsPath);
-		
+
     addFile(fileName);
   });
 
   watcher.onDidChange(() => {
-    refreshCheckedOutFiles()
+    refreshCheckedOutFiles();
   });
 
   watcher.onDidDelete((uri) => {
     let fileName = Helper.unifyFileName(uri.fsPath);
 
     var file = ChangeManager.getChangedFile(fileName);
-    if (!file.path || file.mode == "C") deleteFile(fileName)
+    if (!file.path || file.mode == "C") deleteFile(fileName);
     if (file.mode == "N") undoChanges(fileName);
     //else undoChanges(fileName)
   });
 
-	
   context.subscriptions.push(
     vscode.commands.registerCommand("tfsforcode.checkin", async () => {
       var fileNames = [];
@@ -186,7 +190,10 @@ function activate(context) {
         prompt: "Enter a check-in comment",
       });
       if (message !== undefined) {
-        checkInFiles(fileNames.map(x => x.fullPath), message);
+        checkInFiles(
+          fileNames.map((x) => x.fullPath),
+          message
+        );
       }
     })
   );
@@ -212,6 +219,12 @@ function activate(context) {
         return {
           badge: "C",
           tooltip: "Deleted file",
+          propagate: false,
+        };
+      } else if (changedFile.mode == "R") {
+        return {
+          badge: "R",
+          tooltip: "Renamed file",
           propagate: false,
         };
       }
@@ -262,8 +275,6 @@ function activate(context) {
   vscode.window.createTreeView("checkedOutFilesExcluded", {
     treeDataProvider: tPExcluded,
   });
-	
-
 
   context.subscriptions.push(
     vscode.window.registerTreeDataProvider(
@@ -271,7 +282,7 @@ function activate(context) {
       tPIncluded
     )
   );
-	
+
   context.subscriptions.push(
     vscode.window.registerTreeDataProvider(
       "checkedOutFilesExcluded",

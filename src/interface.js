@@ -43,7 +43,7 @@ var TFSInterface = (function () {
 
   this.addFile = async (fileName) => {
     if (!checkFile(fileName)) return false;
-    return (await this.execute("delete", `"${fileName}"`)).successful;
+    return (await this.execute("add", `"${fileName}"`)).successful;
   };
 
   this.undoCheckout = async (fileName) => {
