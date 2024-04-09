@@ -105,11 +105,11 @@ function isValidFile(fileName) {
 }
 
 function getWorkspaceFolder() {
-  const workspaceFolder = vscode.workspace.workspaceFolders[0];
-  if (!workspaceFolder) {
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  if (!workspaceFolders) {
     return "";
   }
-  return unifyFileName(workspaceFolder.uri.fsPath.toLocaleLowerCase() + "/");
+  return unifyFileName(workspaceFolders[0].uri.fsPath.toLocaleLowerCase() + "/");
 }
 
 
