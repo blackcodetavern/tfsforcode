@@ -135,6 +135,21 @@ function getWorkspaceFolder() {
   return unifyFileName(workspaceFolders[0].uri.fsPath.toLocaleLowerCase() + "/");
 }
 
+function getWorkspaceFolderForTFS() {
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  if (!workspaceFolders) {
+    return "";
+  }
+  var folderName = workspaceFolders[0].uri.fsPath.toLocaleLowerCase() + "/";
+  var hardDrive = folderName.split(":")[0] + ":/";
+  var hardDriveTFS = getTFSBaseDir().split(":")[0] + ":/";
+  if (hardDrive.length == 3) {
+    folderName = folderName.replace(hardDrive, hardDriveTFS);
+  }
+  folderName = folderName.replace(getTFSBaseDir(), "");
+  return unifyFileName(folderName);
+}
+
 
 module.exports = {
   unifyFileName,
@@ -143,6 +158,7 @@ module.exports = {
   isIgnoreFile,
   isValidFile,
   getWorkspaceFolder,
+  getWorkspaceFolderForTFS,
   getTranslatedStrings,
   getTFSPath,
   getTFSCharSet

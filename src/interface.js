@@ -24,7 +24,7 @@ var TFSInterface = (function () {
     try {
       console.log(`Try execute: "${tfPath}" ${command} ${params}`);
       var result = await exec(`"${tfPath}" ${command} ${params}`, {
-        cwd: Helper.getWorkspaceFolder(),
+        cwd: Helper.getWorkspaceFolderForTFS(),
         encoding: Helper.getTFSCharSet(),
       });
       console.log(`Execution successful: "${tfPath}" ${command} ${params}`);
