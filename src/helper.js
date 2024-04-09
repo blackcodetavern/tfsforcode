@@ -15,6 +15,15 @@ function getTFSPath() {
   return configuration.get("tfPath");
 }
 
+function getTFSBaseDir() {
+  var baseDir = configuration.get("tfBaseDir");
+  baseDir = baseDir.replace(/\\/g, '/').trim();
+  if (baseDir.endsWith("/")) {
+    baseDir = baseDir.slice(0, -1);
+  }
+  return baseDir.toLocaleLowerCase();
+}
+
 function getTFSCharSet() {
   return configuration.get("tfCharSet");
 }
@@ -48,7 +57,18 @@ function isIgnoreFile(fileName) {
   if (!ignoreParser) {
     initIgnoreParser()
   }
-    
+  var baseDir = getTFSBaseDir();
+
+  if(!baseDir) {
+    console.log("Ignore file: " + fileName.replace(getWorkspaceFolder(), ""));
+    return true;
+  }
+  if (baseDir) {
+    if (!fileName.startsWith(baseDir)) {
+      console.log("Ignore file: " + fileName.replace(getWorkspaceFolder(), ""));
+      return true;
+    }
+  }
   
   fileName = fileName.replace(getWorkspaceFolder(), "");
   var pathSegments = fileName.split("/");
@@ -60,6 +80,9 @@ function isIgnoreFile(fileName) {
   }
 
   var result = ignoreParser.ignores(fileName);
+
+  
+
   if (result == true) console.log("Ignore file: " + fileName);
   else console.log("Allow: " + fileName);
   return result;

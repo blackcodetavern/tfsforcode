@@ -10,7 +10,7 @@
   "author": {
     "name": "Immanuel Zumbruch"
   },
-  "version": "0.5.0",
+  "version": "0.6.0",
   "engines": {
     "vscode": "^1.78.0"
   },
@@ -25,6 +25,11 @@
           "type": "string",
           "default": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\Common7\\IDE\\CommonExtensions\\Microsoft\\TeamFoundation\\Team Explorer\\tf.exe",
           "description": "Path to tf.exe file."
+        },
+        "tfsforcode.tfBaseDir": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the base TFS directory."
         },
         "tfsforcode.tfLang": {
           "type": "string",

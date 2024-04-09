@@ -19,6 +19,8 @@ var TFSInterface = (function () {
   this.execute = async (command, params) => {
     let tfPath = Helper.getTFSPath();
     if (!Helper.isValidFile(tfPath)) return { success: false, result: "TF.exe is invalid" };
+    if (!Helper.getWorkspaceFolder()) return { success: false, result: "No workspace folder found" };
+    
     try {
       console.log(`Try execute: "${tfPath}" ${command} ${params}`);
       var result = await exec(`"${tfPath}" ${command} ${params}`, {
