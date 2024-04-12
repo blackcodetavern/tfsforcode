@@ -69,20 +69,23 @@ var changeManager = function (context) {
   }
 
   this.addCheckedOutFile = (fileName) => {
+    fileName = Helper.getWorkspaceFileName(fileName)
     this.addChangedFile(fileName, "C");
   };
 
   this.addNewFile = (fileName) => {
+    fileName = Helper.getWorkspaceFileName(fileName)
     this.addChangedFile(fileName, "N");
   };
 
   this.addDeletedFile = (fileName) => {
+    fileName = Helper.getWorkspaceFileName(fileName)
     this.addChangedFile(fileName, "D");
   };
 
   this.addChangedFile = (fileName, mode) => {
     fileName = Helper.unifyFileName(fileName)
-    
+    fileName = Helper.getWorkspaceFileName(fileName)
     changedFiles[fileName] = {
       path: fileName,
       mode: mode

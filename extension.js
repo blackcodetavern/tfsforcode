@@ -203,6 +203,7 @@ function activate(context) {
     onDidChangeFileDecorations: tfDoneEmitter.event,
     provideFileDecoration: (uri) => {
       let fileName = Helper.unifyFileName(uri.fsPath);
+      fileName = Helper.getWorkspaceFileName(fileName)
       let changedFile = ChangeManager.getChangedFile(fileName);
       if (changedFile.mode == "C") {
         return {

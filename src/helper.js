@@ -53,24 +53,40 @@ function initIgnoreParser() {
     }  
 }
 
+function getTFSFileName (fileName) {
+  var baseDir = getWorkspaceFolderForTFS();
+  if (baseDir) {
+    fileName = fileName.replace(getWorkspaceFolder(), baseDir);
+  }
+  return fileName;
+}
+
+function getWorkspaceFileName (fileName) {
+  var baseDir = getWorkspaceFolder();
+  if (baseDir) {
+    fileName = fileName.replace(getWorkspaceFolderForTFS(), baseDir);
+  }
+  return fileName;
+}
+
 function isIgnoreFile(fileName) {
   if (!ignoreParser) {
     initIgnoreParser()
   }
   var baseDir = getTFSBaseDir();
-
   if(!baseDir) {
-    console.log("Ignore file: " + fileName.replace(getWorkspaceFolder(), ""));
+    console.log("Ignore file: " + fileName.replace(getWorkspaceFolderForTFS(), ""));
     return true;
   }
   if (baseDir) {
+    fileName = fileName.replace(getWorkspaceFolder(), getWorkspaceFolderForTFS());
     if (!fileName.startsWith(baseDir)) {
-      console.log("Ignore file: " + fileName.replace(getWorkspaceFolder(), ""));
+      console.log("Ignore file: " + fileName.replace(getWorkspaceFolderForTFS(), ""));
       return true;
     }
   }
   
-  fileName = fileName.replace(getWorkspaceFolder(), "");
+  fileName = fileName.replace(getWorkspaceFolderForTFS(), "");
   var pathSegments = fileName.split("/");
   pathSegments.pop();
   
@@ -89,7 +105,8 @@ function isIgnoreFile(fileName) {
 };
 
 function unifyFileName(fileName) {
-  return fileName.trim().replace(/\\/g, '/').toLocaleLowerCase()
+  var fn = fileName.trim().replace(/\\/g, '/').toLocaleLowerCase()
+  return fn;
 }
 
 async function revertFile(fileName) {
@@ -140,13 +157,12 @@ function getWorkspaceFolderForTFS() {
   if (!workspaceFolders) {
     return "";
   }
-  var folderName = workspaceFolders[0].uri.fsPath.toLocaleLowerCase() + "/";
+  var folderName = unifyFileName(workspaceFolders[0].uri.fsPath.toLocaleLowerCase() + "/");
   var hardDrive = folderName.split(":")[0] + ":/";
   var hardDriveTFS = getTFSBaseDir().split(":")[0] + ":/";
   if (hardDrive.length == 3) {
     folderName = folderName.replace(hardDrive, hardDriveTFS);
   }
-  folderName = folderName.replace(getTFSBaseDir(), "");
   return unifyFileName(folderName);
 }
 
@@ -161,5 +177,7 @@ module.exports = {
   getWorkspaceFolderForTFS,
   getTranslatedStrings,
   getTFSPath,
-  getTFSCharSet
+  getTFSCharSet,
+  getTFSFileName,
+  getWorkspaceFileName
 };

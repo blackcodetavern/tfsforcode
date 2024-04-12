@@ -9,7 +9,8 @@ const Helper = require("./helper")
 var TFSInterface = (function () {
   var checkFile = function (fileName) {
     if (!fileName) return false;
-    if (!(fileName.indexOf(Helper.getWorkspaceFolder()) > -1)) return false; // File is not inside of the workingdir
+    fileName = Helper.getTFSFileName(fileName);
+    if (!(fileName.indexOf(Helper.getWorkspaceFolderForTFS()) > -1)) return false; // File is not inside of the workingdir
     fileName = Helper.unifyFileName(fileName);
     if (Helper.isIgnoreFile(fileName)) return false; // File is excluded by the .gitignore or .vscodeignore
     return true;
@@ -17,10 +18,10 @@ var TFSInterface = (function () {
 
 
   this.execute = async (command, params) => {
-    let tfPath = Helper.getTFSPath();
+    let tfPath =   Helper.getTFSPath();
     if (!Helper.isValidFile(tfPath)) return { success: false, result: "TF.exe is invalid" };
-    if (!Helper.getWorkspaceFolder()) return { success: false, result: "No workspace folder found" };
-    
+    if (!Helper.getWorkspaceFolderForTFS()) return { success: false, result: "No workspace folder found" };
+    params = Helper.getTFSFileName(params);
     try {
       console.log(`Try execute: "${tfPath}" ${command} ${params}`);
       var result = await exec(`"${tfPath}" ${command} ${params}`, {
@@ -89,6 +90,7 @@ var TFSInterface = (function () {
       var elements = line.split(" ");
       var fileName = Helper.unifyFileName(elements[elements.length - 1]);
       if (!checkFile(fileName)) continue;
+      fileName = Helper.getWorkspaceFileName(fileName);
       if (line.indexOf(translatedStrings.edit) > -1) {
         checkedOutFiles[fileName] = { path: fileName, mode: "C" };
       } else if (line.indexOf(translatedStrings.add) > -1) {

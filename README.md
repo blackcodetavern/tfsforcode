@@ -19,8 +19,7 @@ The extension contributes the following commands:
 
 - TFS - Undo change: Undo the changes made to the file.
 - TFS - Checkout file: Checkout the file from TFS.
-- TFS - Check in: Check in the included files to TFS. This can be done in the TFS Tab
-
+- TFS - Add file: Add file to TFS.
 These commands can be accessed from the context menu in the file explorer or the command palette (`Ctrl+Shift+P`).
 
 The extension also provides a view container in the activity bar labelled "TFS", which includes two views, "Included Changes" and "Excluded Changes". These views display the files that are included and excluded from source control operations.
