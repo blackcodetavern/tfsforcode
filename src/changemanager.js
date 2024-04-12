@@ -78,6 +78,11 @@ var changeManager = function (context) {
     this.addChangedFile(fileName, "N");
   };
 
+  this.addRenameFile = (fileNameOld, fileNameNew) => {
+    fileNameOld = Helper.getWorkspaceFileName(fileNameNew)
+    this.addChangedFile(fileNameNew, "R");
+  };
+
   this.addDeletedFile = (fileName) => {
     fileName = Helper.getWorkspaceFileName(fileName)
     this.addChangedFile(fileName, "D");

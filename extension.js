@@ -44,12 +44,24 @@ function activate(context) {
 
   async function addFile(fileName) {
     if (Helper.isIgnoreFile(fileName)) return;
+    let changedFile = ChangeManager.getChangedFile(fileName);
+    if (changedFile.mode == "R") return;
     var success = await TFSInterface.addFile(fileName);
     if (success) {
       ChangeManager.addNewFile(fileName);
     } else {
       ChangeManager.removeChangedFile(fileName);
     }
+    tfDoneEmitter.fire();
+  }
+
+  async function renameFile(fileNameOld, fileNameNew) {
+    if (Helper.isIgnoreFile(fileNameOld)) return;
+    if (Helper.isIgnoreFile(fileNameNew)) return;
+    var success = TFSInterface.renameFile(fileNameOld, fileNameNew);
+    if (success) {
+      ChangeManager.addRenameFile(fileNameOld, fileNameNew);
+    } 
     tfDoneEmitter.fire();
   }
 
@@ -134,6 +146,20 @@ function activate(context) {
     vscode.commands.registerCommand("tfsforcode.add", async (uri) => {
       var fileName = Helper.unifyFileName(uri.fsPath);
       addFile(fileName);
+    })
+  );
+
+  // Rename action
+  context.subscriptions.push(
+    vscode.commands.registerCommand("tfsforcode.rename", async (uri) => {
+      let fileNameNew = await vscode.window.showInputBox({
+        prompt: "What is the new name of the file?"
+      });
+      var fileName = Helper.unifyFileName(uri.fsPath);
+      //add full path of old file to new file
+      fileNameNew = fileName.split("/").slice(0, -1).join("/") + "/" + fileNameNew;
+      fileNameNew = Helper.unifyFileName(fileNameNew);
+      renameFile(fileName, fileNameNew);
     })
   );
 

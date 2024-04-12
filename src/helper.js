@@ -56,7 +56,7 @@ function initIgnoreParser() {
 function getTFSFileName (fileName) {
   var baseDir = getWorkspaceFolderForTFS();
   if (baseDir) {
-    fileName = fileName.replace(getWorkspaceFolder(), baseDir);
+    fileName = fileName.split(getWorkspaceFolder()).join(baseDir);
   }
   return fileName;
 }

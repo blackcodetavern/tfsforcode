@@ -10,7 +10,7 @@
   "author": {
     "name": "Immanuel Zumbruch"
   },
-  "version": "0.7.0",
+  "version": "0.8.0",
   "engines": {
     "vscode": "^1.78.0"
   },
@@ -79,21 +79,29 @@
       {
         "command": "tfsforcode.checkin",
         "title": "TFS - Check in"
+      },
+      {
+        "command": "tfsforcode.rename",
+        "title": "TFS - Rename"
       }
     ],
     "menus": {
       "explorer/context": [
         {
           "command": "tfsforcode.checkout",
-          "when": "true"
+          "when": "resourceLangId != '' && explorerResourceIsFolder == false"
         },
         {
           "command": "tfsforcode.undo",
-          "when": "true"
+          "when": "resourceLangId != '' && explorerResourceIsFolder == false"
         },
         {
           "command": "tfsforcode.add",
-          "when": "true"
+          "when": "resourceLangId != '' && explorerResourceIsFolder == false"
+        },
+        {
+          "command": "tfsforcode.rename",
+          "when": "resourceLangId != '' && explorerResourceIsFolder == false"
         }
       ],
       "view/item/context": [

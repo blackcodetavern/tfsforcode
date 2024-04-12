@@ -49,6 +49,11 @@ var TFSInterface = (function () {
     return (await this.execute("add", `"${fileName}"`)).successful;
   };
 
+  this.renameFile = async (fileNameOld, fileNameNew) => {
+    if (!checkFile(fileNameOld)) return false;
+    return (await this.execute("rename", `"${fileNameOld}" "${fileNameNew}"`)).successful;
+  };
+
   this.undoCheckout = async (fileName) => {
      if (!checkFile(fileName)) return false;
      return (await this.execute("undo", `"${fileName}"`)).successful;
