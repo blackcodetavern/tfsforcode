@@ -73,13 +73,13 @@ var TFSInterface = (function () {
 
     comment = `"${comment}"`;
     let formattedFileNames = fileNames
-      .filter((x) => !checkFile(x))
+      .filter((x) => checkFile(x))
       .map((name) => {
         return `"${name}"`;
       })
       .join(" ");
 
-    return await this.execute(
+    if(formattedFileNames != '') return await this.execute(
       "checkin",
       `/comment:${comment} ${formattedFileNames}`
     );
