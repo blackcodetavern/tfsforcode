@@ -28,7 +28,7 @@ var TFSInterface = (function () {
         cwd: Helper.getWorkspaceFolderForTFS(),
         encoding: Helper.getTFSCharSet(),
       });
-      console.log(`Execution successful: "${tfPath}" ${command} ${params}`);
+      vscode.window.showInformationMessage(`${command} successful.`);
       return {successful:true, msg: result.stdout+""};
     } catch (e) {
       vscode.window.showErrorMessage(`Error during ${command}.`);
@@ -37,6 +37,19 @@ var TFSInterface = (function () {
   }
 
   
+  this.getStatus = async () => {
+    return (await this.execute("status", "/recursive"));
+  };
+
+  this.getLatestVersion = async (path) => {
+    var tfsPath = Helper.convertToTFSPath(path);
+    return (await this.execute("get", `"${tfsPath}" /recursive`));
+  };
+
+  this.view = async (path) => {
+    var tfsPath = Helper.convertToTFSPath(path);
+    return (await this.execute("view", `"${tfsPath}"`));
+  };
 
 
   this.deleteFile = async (fileName) => {
@@ -61,9 +74,9 @@ var TFSInterface = (function () {
 
 
   this.checkoutFile = async (fileName) => {
-       if (!checkFile(fileName)) return false;
-       return (await this.execute("checkout", `"${fileName}"`)).successful;
-    };
+    if (!checkFile(fileName)) return false;
+    return (await this.execute("checkout", `"${fileName}"`)).successful;
+  };
 
   this.checkinFiles = async (fileNames, comment) => {
     if (fileNames.length == 0) {
@@ -88,7 +101,7 @@ var TFSInterface = (function () {
   this.getCheckedOutFiles = async () => {
     var translatedStrings = Helper.getTranslatedStrings();
     let checkedOutFiles = {};
-    let result = await this.execute("status", "/recursive");
+    let result = await this.getStatus();
 
     const lines = result.msg.split("\n");
     for (const line of lines) {

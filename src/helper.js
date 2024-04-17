@@ -24,6 +24,13 @@ function getTFSBaseDir() {
   return baseDir.toLocaleLowerCase();
 }
 
+function convertToTFSPath(path) {
+  var newPath = getTFSFileName(path);
+  //newPath = newPath.replace(getTFSBaseDir(), "$");
+
+  return newPath;
+}
+
 function getTFSCharSet() {
   return configuration.get("tfCharSet");
 }
@@ -179,5 +186,6 @@ module.exports = {
   getTFSPath,
   getTFSCharSet,
   getTFSFileName,
-  getWorkspaceFileName
+  getWorkspaceFileName,
+  convertToTFSPath
 };
