@@ -18,8 +18,8 @@ function activate(context) {
   var ChangeManager = cm(context);
 
   async function refreshCheckedOutFiles () {
-    var testFile = Helper.getWorkspaceFolderForTFS() + "test.txt";
-    if (Helper.isIgnoreFile(testFile)) return;
+    var folder = Helper.getWorkspaceFolderForTFS();
+    if (Helper.isIgnoreFile(folder)) return;
     ChangeManager.setChangedFiles(await TFSInterface.getCheckedOutFiles());
     tfDoneEmitter.fire();
   }

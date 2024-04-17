@@ -91,6 +91,8 @@ function isIgnoreFile(fileName) {
   }
   if (baseDir) {
     fileName = fileName.replace(getWorkspaceFolder(), getWorkspaceFolderForTFS());
+    if (fileName == getWorkspaceFolderForTFS()) fileName += "test.txt";
+    if ((fileName+"/") == getWorkspaceFolderForTFS()) fileName += "/test.txt";
     if (!fileName.startsWith(baseDir)) {
       console.log("Ignore file: " + fileName.replace(getWorkspaceFolderForTFS(), ""));
       return true;
@@ -105,6 +107,7 @@ function isIgnoreFile(fileName) {
     console.log("Ignore file: " + fileName);
     return true;
   }
+
 
   var result = ignoreParser.ignores(fileName);
 
