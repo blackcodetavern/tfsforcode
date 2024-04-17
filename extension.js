@@ -17,7 +17,9 @@ var lockWatcher = false;
 function activate(context) {
   var ChangeManager = cm(context);
 
-  async function refreshCheckedOutFiles() {
+  async function refreshCheckedOutFiles () {
+    var testFile = Helper.getWorkspaceFolderForTFS() + "test.txt";
+    if (Helper.isIgnoreFile(testFile)) return;
     ChangeManager.setChangedFiles(await TFSInterface.getCheckedOutFiles());
     tfDoneEmitter.fire();
   }
@@ -86,7 +88,7 @@ function activate(context) {
     tfDoneEmitter.fire();
   }
 
-  async function compare(fileName) {
+  async function compare(fileName, fileNameOriginal) {
     if (Helper.isIgnoreFile(fileName)) return;
     var fileContent = (await TFSInterface.view(fileName)).msg;
     const contentWithoutBOM = fileContent.replace("ï»¿", "");
@@ -98,7 +100,7 @@ function activate(context) {
     // Diff-Ansicht öffnen
     vscode.commands.executeCommand('vscode.diff',
       serverDocument.uri,
-      vscode.Uri.file(fileName),
+      vscode.Uri.file(fileNameOriginal),
       'Server ↔ Lokale Datei'  
     );
     tfDoneEmitter.fire();
@@ -195,7 +197,7 @@ function activate(context) {
   context.subscriptions.push(
     vscode.commands.registerCommand("tfsforcode.compare", async (uri) => {
       var fileName = Helper.unifyFileName(uri.fsPath);
-      compare(fileName);
+      compare(fileName, uri.fsPath);
     })
   );
 
@@ -246,6 +248,7 @@ function activate(context) {
   // Checkout action
   context.subscriptions.push(
     vscode.workspace.onDidChangeTextDocument((event) => {
+      if (lockWatcher) return;
       if (event.document.isDirty) {
         var fileName = Helper.unifyFileName(event.document.fileName);
         checkoutFile(fileName);

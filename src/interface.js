@@ -26,7 +26,7 @@ var TFSInterface = (function () {
       console.log(`Try execute: "${tfPath}" ${command} ${params}`);
       var result = await exec(`"${tfPath}" ${command} ${params}`, {
         cwd: Helper.getWorkspaceFolderForTFS(),
-        encoding: Helper.getTFSCharSet(),
+        encoding: command=="view"?Helper.getTFSContentCharSet():Helper.getTFSCharSet(),
       });
       vscode.window.showInformationMessage(`${command} successful.`);
       return {successful:true, msg: result.stdout+""};

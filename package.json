@@ -52,6 +52,15 @@
             "utf-8"
           ],
           "description": "Choose the charset of the TF.exe"
+        },
+        "tfsforcode.tfContentCharSet": {
+          "type": "string",
+          "default": "utf-8",
+          "enum": [
+            "utf-8",
+            "latin1"
+          ],
+          "description": "Choose the charset of the content of the files from the TFS"
         }
       }
     },

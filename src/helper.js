@@ -35,6 +35,10 @@ function getTFSCharSet() {
   return configuration.get("tfCharSet");
 }
 
+function getTFSContentCharSet() {
+  return configuration.get("tfContentCharSet");
+}
+
 
 function initIgnoreParser() {
     const gitignorePath = path.join(getWorkspaceFolder(), ".gitignore");
@@ -187,5 +191,6 @@ module.exports = {
   getTFSCharSet,
   getTFSFileName,
   getWorkspaceFileName,
-  convertToTFSPath
+  convertToTFSPath,
+  getTFSContentCharSet
 };
