@@ -6,27 +6,31 @@ TFSForCode is a Visual Studio Code extension that provides Team Foundation Serve
 
 There are some important shortcomings
 - Works only with the german and english version of the tf.exe (you can change the settings)
-- Renames, merges and undeletes are not yet possible
-- No compare with previous version of a file
+- Merges and undeletes are not yet possible
 - No show history
 - Include/Exclude all items from the pending changes treeview are missing.
 - checkout of multiple files 
-- ...
 
 ## Features
 
 The extension contributes the following commands:
 
 - TFS - Undo change: Undo the changes made to the file.
-- TFS - Checkout file: Checkout the file from TFS.
+- TFS - Checkout file: Get Latest Version of the File and checkout of the file from TFS.
 - TFS - Add file: Add file to TFS.
+- TFS - Get Latest Version
+- TFS - Compare with latest Version
+- TFS - Rename
 These commands can be accessed from the context menu in the file explorer or the command palette (`Ctrl+Shift+P`).
 
 The extension also provides a view container in the activity bar labelled "TFS", which includes two views, "Included Changes" and "Excluded Changes". These views display the files that are included and excluded from source control operations.
 
 ## Requirements
 
-This extension requires the `tf.exe` command-line client for Team Foundation Server. You can specify the path to `tf.exe` in the extension settings (`tfsforcode.tfPath`).
+- This extension requires the `tf.exe` command-line client for Team Foundation Server. You can specify the path to `tf.exe` in the extension settings (`tfsforcode.tfPath`).
+- Your Project needs to be a Visual Studio Code Workspace. (File > Save as Workspace, than open Workspace (e.g. over recent files))
+- Use a .gitignore or .vscodeignore file to exclude files, which should not be added to the TFS. E.g. if you don't have one and 
+execute "npm install" it will add all npm packages as new files for the TFS, which is not useful. 
 
 ## Dependencies
 
