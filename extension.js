@@ -1,13 +1,10 @@
-const fs = require('fs');
-const vscode = require('vscode');
+const fs = require("fs");
+const vscode = require("vscode");
 const tfDoneEmitter = new vscode.EventEmitter();
-var cm = require("./src/changemanager.js")
+var cm = require("./src/changemanager.js");
 
-
-
-
-const TFSInterface = require("./src/interface.js")
-const Helper = require("./src/helper.js")
+const TFSInterface = require("./src/interface.js");
+const Helper = require("./src/helper.js");
 
 var lockWatcher = false;
 
@@ -17,7 +14,7 @@ var lockWatcher = false;
 function activate(context) {
   var ChangeManager = cm(context);
 
-  async function refreshCheckedOutFiles () {
+  async function refreshCheckedOutFiles() {
     var folder = Helper.getWorkspaceFolderForTFS();
     if (Helper.isIgnoreFile(folder)) return;
     ChangeManager.setChangedFiles(await TFSInterface.getCheckedOutFiles());
@@ -41,24 +38,9 @@ function activate(context) {
     if (!changedFile.path) {
       lockWatcher = true;
       await TFSInterface.getLatestVersion(fileName);
-      const document = vscode.window.activeTextEditor.document;
-      if (document) {
-        await vscode.window.activeTextEditor.edit((edit) => {
-          const fileContent = fs.readFileSync(document.fileName);
-          const contentWithoutBOM = fileContent.slice(fileContent[0] === 0xEF && fileContent[1] === 0xBB && fileContent[2] === 0xBF ? 3 : 0).toString();
-          edit.replace(
-            new vscode.Range(
-              document.lineAt(0).range.start,
-              document.lineAt(document.lineCount - 1).range.end
-            ),
-            contentWithoutBOM
-          );
-        });
-      }
-      lockWatcher = false;
       success = await TFSInterface.checkoutFile(fileName);
+      if (success) lockWatcher = false;
     }
-      
 
     if (success) {
       ChangeManager.addCheckedOutFile(fileName);
@@ -79,7 +61,6 @@ function activate(context) {
     tfDoneEmitter.fire();
   }
 
-
   async function getLatestVersion(fileName) {
     if (Helper.isIgnoreFile(fileName)) return;
     lockWatcher = true;
@@ -94,18 +75,18 @@ function activate(context) {
     const contentWithoutBOM = fileContent.replace("ï»¿", "");
     const serverDocument = await vscode.workspace.openTextDocument({
       content: contentWithoutBOM,
-      language: 'plaintext'
+      language: "plaintext",
     });
 
     // Diff-Ansicht öffnen
-    vscode.commands.executeCommand('vscode.diff',
+    vscode.commands.executeCommand(
+      "vscode.diff",
       serverDocument.uri,
       vscode.Uri.file(fileNameOriginal),
-      'Server ↔ Lokale Datei'  
+      "Server ↔ Lokale Datei"
     );
     tfDoneEmitter.fire();
   }
-
 
   async function renameFile(fileNameOld, fileNameNew) {
     if (Helper.isIgnoreFile(fileNameOld)) return;
@@ -113,7 +94,7 @@ function activate(context) {
     var success = TFSInterface.renameFile(fileNameOld, fileNameNew);
     if (success) {
       ChangeManager.addRenameFile(fileNameOld, fileNameNew);
-    } 
+    }
     tfDoneEmitter.fire();
   }
 
@@ -221,11 +202,12 @@ function activate(context) {
   context.subscriptions.push(
     vscode.commands.registerCommand("tfsforcode.rename", async (uri) => {
       let fileNameNew = await vscode.window.showInputBox({
-        prompt: "What is the new name of the file?"
+        prompt: "What is the new name of the file?",
       });
       var fileName = Helper.unifyFileName(uri.fsPath);
       //add full path of old file to new file
-      fileNameNew = fileName.split("/").slice(0, -1).join("/") + "/" + fileNameNew;
+      fileNameNew =
+        fileName.split("/").slice(0, -1).join("/") + "/" + fileNameNew;
       fileNameNew = Helper.unifyFileName(fileNameNew);
       renameFile(fileName, fileNameNew);
     })
@@ -248,8 +230,26 @@ function activate(context) {
   // Checkout action
   context.subscriptions.push(
     vscode.workspace.onDidChangeTextDocument((event) => {
-      if (lockWatcher) return;
-      if (event.document.isDirty) {
+      if (lockWatcher) {
+        vscode.window.showInformationMessage(
+          "Getting latest Version, please wait a moment ..."
+        );
+        const activeEditor = vscode.window.activeTextEditor;
+        if (activeEditor && activeEditor.document === event.document) {
+          // Setzt die Änderungen im Dokument zurück
+          const originalContent = fs
+            .readFileSync(event.document.fileName)
+            .toString();
+          activeEditor.edit((editorEdit) => {
+            const fullRange = new vscode.Range(
+              event.document.lineAt(0).range.start,
+              event.document.lineAt(event.document.lineCount - 1).range.end
+            );
+            editorEdit.replace(fullRange, originalContent);
+          });
+          lockWatcher = false;
+        }
+      } else if (!lockWatcher && event.document.isDirty) {
         var fileName = Helper.unifyFileName(event.document.fileName);
         checkoutFile(fileName);
       }
@@ -301,7 +301,7 @@ function activate(context) {
     onDidChangeFileDecorations: tfDoneEmitter.event,
     provideFileDecoration: (uri) => {
       let fileName = Helper.unifyFileName(uri.fsPath);
-      fileName = Helper.getWorkspaceFileName(fileName)
+      fileName = Helper.getWorkspaceFileName(fileName);
       let changedFile = ChangeManager.getChangedFile(fileName);
       if (changedFile.mode == "C") {
         return {
@@ -396,6 +396,6 @@ function activate(context) {
 function deactivate() {}
 
 module.exports = {
-	activate,
-	deactivate
-}
+  activate,
+  deactivate,
+};
