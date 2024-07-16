@@ -31,21 +31,49 @@ function activate(context) {
     tfDoneEmitter.fire();
   }
 
+  function resetActiveFile() {
+    vscode.window.showInformationMessage(
+      "Getting latest Version, please wait a moment ..."
+    );
+    const activeEditor = vscode.window.activeTextEditor;
+    const document = vscode.window.activeTextEditor.document;
+    if (activeEditor) {
+      // Setzt die Änderungen im Dokument zurück
+      const originalContent = fs.readFileSync(document.fileName).toString();
+      const fullRange = new vscode.Range(
+        document.lineAt(0).range.start,
+        document.lineAt(document.lineCount - 1).range.end
+      );
+      if (originalContent != activeEditor.document.getText())
+        activeEditor.edit((editorEdit) => {
+          editorEdit.replace(fullRange, originalContent);
+        });
+    }
+  }
+
   async function checkoutFile(fileName) {
-    if (Helper.isIgnoreFile(fileName)) return;
+    if (Helper.isIgnoreFile(fileName)) return false;
     let changedFile = ChangeManager.getChangedFile(fileName);
     var success = false;
     if (!changedFile.path) {
       lockWatcher = true;
+      resetActiveFile();
       await TFSInterface.getLatestVersion(fileName);
+      resetActiveFile();
       success = await TFSInterface.checkoutFile(fileName);
       if (success) lockWatcher = false;
+      else {
+        resetActiveFile();
+        lockWatcher = false;
+      }
     }
 
     if (success) {
       ChangeManager.addCheckedOutFile(fileName);
       tfDoneEmitter.fire();
     }
+
+    return success;
   }
 
   async function addFile(fileName) {
@@ -229,26 +257,9 @@ function activate(context) {
 
   // Checkout action
   context.subscriptions.push(
-    vscode.workspace.onDidChangeTextDocument((event) => {
+    vscode.workspace.onDidChangeTextDocument(async (event) => {
       if (lockWatcher) {
-        vscode.window.showInformationMessage(
-          "Getting latest Version, please wait a moment ..."
-        );
-        const activeEditor = vscode.window.activeTextEditor;
-        if (activeEditor && activeEditor.document === event.document) {
-          // Setzt die Änderungen im Dokument zurück
-          const originalContent = fs
-            .readFileSync(event.document.fileName)
-            .toString();
-          activeEditor.edit((editorEdit) => {
-            const fullRange = new vscode.Range(
-              event.document.lineAt(0).range.start,
-              event.document.lineAt(event.document.lineCount - 1).range.end
-            );
-            editorEdit.replace(fullRange, originalContent);
-          });
-          lockWatcher = false;
-        }
+        resetActiveFile();
       } else if (!lockWatcher && event.document.isDirty) {
         var fileName = Helper.unifyFileName(event.document.fileName);
         checkoutFile(fileName);
