@@ -1,12 +1,17 @@
 const fs = require("fs");
+const iconv = require("iconv-lite");
 const vscode = require("vscode");
 const tfDoneEmitter = new vscode.EventEmitter();
 var cm = require("./src/changemanager.js");
 
 const TFSInterface = require("./src/interface.js");
 const Helper = require("./src/helper.js");
+const { mergeIntoEditor } = require("./src/merge.js");
 
 var lockWatcher = false;
+// Files whose checkout runs right now - the first change of a checked-in
+// file starts it, and the changes typed meanwhile must not start it again.
+const checkingOut = new Set();
 
 /**
  * @param {vscode.ExtensionContext} context
@@ -31,41 +36,38 @@ function activate(context) {
     tfDoneEmitter.fire();
   }
 
-  function resetActiveFile() {
-    vscode.window.showInformationMessage(
-      "Getting latest Version, please wait a moment ..."
-    );
-    const activeEditor = vscode.window.activeTextEditor;
-    const document = vscode.window.activeTextEditor.document;
-    if (activeEditor) {
-      // Setzt die Änderungen im Dokument zurück
-      const originalContent = fs.readFileSync(document.fileName).toString();
-      const fullRange = new vscode.Range(
-        document.lineAt(0).range.start,
-        document.lineAt(document.lineCount - 1).range.end
-      );
-      if (originalContent != activeEditor.document.getText())
-        activeEditor.edit((editorEdit) => {
-          editorEdit.replace(fullRange, originalContent);
-        });
+  function readFileOrNull(fileName) {
+    try {
+      return fs.readFileSync(fileName);
+    } catch (e) {
+      return null;
     }
   }
 
-  async function checkoutFile(fileName) {
+  /** Gets the latest version and checks the file out. document: the editor
+   *  the user is typing in. Nothing of what they type is reset any more:
+   *  the version on disk is read before and after "tf get", and only if the
+   *  server had a newer one are its changes merged in - where they belong,
+   *  so the cursor stays. Before, the whole text was replaced twice, and
+   *  what was typed during the seconds tf.exe took was lost. */
+  async function checkoutFile(fileName, document) {
     if (Helper.isIgnoreFile(fileName)) return false;
     let changedFile = ChangeManager.getChangedFile(fileName);
+    if (changedFile.path || checkingOut.has(fileName)) return false;
+
+    checkingOut.add(fileName);
+    lockWatcher = true; // tf get rewrites the file: no reaction of the file watcher to it
     var success = false;
-    if (!changedFile.path) {
-      lockWatcher = true;
-      resetActiveFile();
+    try {
+      const before = readFileOrNull(fileName);
       await TFSInterface.getLatestVersion(fileName);
-      resetActiveFile();
+      const after = readFileOrNull(fileName);
       success = await TFSInterface.checkoutFile(fileName);
-      if (success) lockWatcher = false;
-      else {
-        resetActiveFile();
-        lockWatcher = false;
-      }
+      if (document && before && after && !before.equals(after))
+        await bringInServerChanges(fileName, document, before, after);
+    } finally {
+      lockWatcher = false;
+      checkingOut.delete(fileName);
     }
 
     if (success) {
@@ -74,6 +76,28 @@ function activate(context) {
     }
 
     return success;
+  }
+
+  async function bringInServerChanges(fileName, document, before, after) {
+    const charset = Helper.getTFSContentCharSet();
+    const text = (buffer) => iconv.decode(buffer, charset).replace(/^﻿/, "");
+    const { conflict, edits } = mergeIntoEditor(text(before), text(after), document.getText());
+    if (conflict) {
+      const choice = await vscode.window.showWarningMessage(
+        "There is a newer version on the server, and it changes lines you are editing. " +
+          "Your text is unchanged; on disk is the server's version.",
+        "Compare"
+      );
+      if (choice == "Compare") compare(fileName, document.uri.fsPath);
+      return;
+    }
+    if (edits.length == 0) return;
+    const edit = new vscode.WorkspaceEdit();
+    for (const e of edits) {
+      edit.replace(document.uri, new vscode.Range(document.positionAt(e.start), document.positionAt(e.end)), e.text);
+    }
+    await vscode.workspace.applyEdit(edit);
+    vscode.window.showInformationMessage("A newer version from the server was merged into your changes.");
   }
 
   async function addFile(fileName) {
@@ -258,11 +282,9 @@ function activate(context) {
   // Checkout action
   context.subscriptions.push(
     vscode.workspace.onDidChangeTextDocument(async (event) => {
-      if (lockWatcher) {
-        resetActiveFile();
-      } else if (!lockWatcher && event.document.isDirty) {
+      if (event.document.isDirty && event.contentChanges.length > 0) {
         var fileName = Helper.unifyFileName(event.document.fileName);
-        checkoutFile(fileName);
+        checkoutFile(fileName, event.document);
       }
     })
   );

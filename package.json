@@ -10,7 +10,7 @@
   "author": {
     "name": "Immanuel Zumbruch"
   },
-  "version": "0.12.0",
+  "version": "0.14.0",
   "engines": {
     "vscode": "^1.78.0"
   },
@@ -61,6 +61,16 @@
             "latin1"
           ],
           "description": "Choose the charset of the content of the files from the TFS"
+        },
+        "tfsforcode.neverAdd": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "node_modules"
+          ],
+          "description": "Folders whose files are never added to TFS, whatever the .tfignore files say - also in projects without one."
         }
       }
     },
@@ -178,7 +188,8 @@
   "scripts": {
     "lint": "eslint .",
     "pretest": "npm run lint",
-    "test": "node ./test/runTest.js"
+    "test": "node ./test/runTest.js",
+    "test:unit": "node --test test/tfignore.test.js test/merge.test.js"
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",
@@ -193,6 +204,7 @@
   },
   "dependencies": {
     "iconv-lite": "^0.6.3",
-    "ignore": "^5.2.4"
+    "ignore": "^5.2.4",
+    "node-diff3": "^3.2.1"
   }
 }

@@ -35,8 +35,13 @@ The extension also provides a view container in the activity bar labelled "TFS",
 
 - This extension requires the `tf.exe` command-line client for Team Foundation Server. You can specify the path to `tf.exe` in the extension settings (`tfsforcode.tfPath`).
 - Your Project needs to be a Visual Studio Code Workspace. (File > Save as Workspace, than open Workspace (e.g. over recent files))
-- Use a .gitignore or .vscodeignore file to exclude files, which should not be added to the TFS. E.g. if you don't have one and
-  execute "npm install" it will add all npm packages as new files for the TFS, which is not useful.
+- New files are added to the TFS unless an ignore rule leaves them out:
+  - every `.tfignore` from `tfsforcode.tfBaseDir` down to the file's folder, as tf.exe reads them (a deeper one decides over a higher one),
+  - the `.gitignore` and `.vscodeignore` of the workspace root,
+  - folders starting with a dot,
+  - the folders named in `tfsforcode.neverAdd` (default `node_modules`) - also in projects without any ignore file.
+
+  Changed ignore files count at once, without restarting VS Code.
 
 ## Dependencies
 

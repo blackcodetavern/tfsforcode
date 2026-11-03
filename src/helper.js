@@ -1,11 +1,9 @@
 const vscode = require("vscode");
-const ignore = require("ignore");
 const fs = require("fs");
 const path = require("path");
 const lang = require("./lang.js");
+const TfIgnore = require("./tfignore.js");
 var configuration = vscode.workspace.getConfiguration("tfsforcode");
-
-var ignoreParser;
 
 function getTranslatedStrings() {
   return lang[configuration.get("tfLang")];
@@ -39,30 +37,6 @@ function getTFSContentCharSet() {
   return configuration.get("tfContentCharSet");
 }
 
-function initIgnoreParser() {
-  const gitignorePath = path.join(getWorkspaceFolder(), ".gitignore");
-  const vscodeignorePath = path.join(getWorkspaceFolder(), ".vscodeignore");
-
-  let gitignoreContent = "";
-  let vscodeignoreContent = "";
-
-  if (fs.existsSync(gitignorePath)) {
-    gitignoreContent = fs.readFileSync(gitignorePath).toString();
-  }
-
-  if (fs.existsSync(vscodeignorePath)) {
-    vscodeignoreContent = fs.readFileSync(vscodeignorePath).toString();
-  }
-
-  if (!ignoreParser) {
-    console.log("Reading ignore files");
-    ignoreParser = ignore
-      .default()
-      .add(gitignoreContent)
-      .add(vscodeignoreContent);
-  }
-}
-
 function getTFSFileName(fileName) {
   var baseDir = getWorkspaceFolderForTFS();
   if (baseDir) {
@@ -80,9 +54,6 @@ function getWorkspaceFileName(fileName) {
 }
 
 function isIgnoreFile(fileName) {
-  if (!ignoreParser) {
-    initIgnoreParser();
-  }
   var baseDir = getTFSBaseDir();
   if (!baseDir) {
     console.log(
@@ -105,6 +76,7 @@ function isIgnoreFile(fileName) {
     }
   }
 
+  var fullPath = fileName;
   fileName = fileName.replace(getWorkspaceFolderForTFS(), "");
   var pathSegments = fileName.split("/");
   pathSegments.pop();
@@ -114,7 +86,19 @@ function isIgnoreFile(fileName) {
     return true;
   }
 
-  var result = ignoreParser.ignores(fileName);
+  var neverAdd = vscode.workspace.getConfiguration("tfsforcode").get("neverAdd") || [];
+  if (TfIgnore.isInNeverAdded(fullPath, baseDir, neverAdd)) {
+    console.log("Ignore file (tfsforcode.neverAdd): " + fileName);
+    return true;
+  }
+
+  // .gitignore and .vscodeignore of the workspace root, as before - read
+  // again when they change; then every .tfignore down to the file's folder.
+  var result =
+    [".gitignore", ".vscodeignore"].some((name) => {
+      var rules = TfIgnore.rulesOf(path.join(getWorkspaceFolder(), name), false);
+      return rules != null && rules.ignores(fileName);
+    }) || TfIgnore.isTfIgnored(fullPath, baseDir);
 
   if (result == true) console.log("Ignore file: " + fileName);
   else console.log("Allow: " + fileName);
